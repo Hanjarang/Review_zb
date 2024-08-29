@@ -20,5 +20,6 @@ public class MemoTest {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
     private String text;
+    private String name;
 
 }
