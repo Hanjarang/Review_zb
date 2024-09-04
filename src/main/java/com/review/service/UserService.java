@@ -4,6 +4,7 @@ import com.review.entity.User;
 import com.review.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class UserService {
@@ -40,5 +41,11 @@ public class UserService {
         return userRepository.findByUsername(username)
                 .filter(user -> user.getPassword().equals(password))
                 .orElse(null);
+    }
+
+    // 회원 탈퇴 처리 (username을 기반으로 사용자 삭제)
+    @Transactional
+    public void deleteUser(String username) {
+        userRepository.deleteByUsername(username); // repository에서 삭제 처리
     }
 }
