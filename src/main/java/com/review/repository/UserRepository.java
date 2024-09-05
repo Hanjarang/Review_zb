@@ -9,4 +9,6 @@ public interface UserRepository extends JpaRepository<User, Long> {
     Optional<User> findByUsername(String username);  // ID로 사용자 검색
 
     boolean existsByUsername(String username);  // ID 중복 확인
+
+    void deleteByUsername(String username); // 특정 username으로 사용자 삭제
 }
