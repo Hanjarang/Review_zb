@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class ReviewService {
@@ -19,6 +20,7 @@ public class ReviewService {
         this.reviewRepository = reviewRepository;
     }
 
+    // 리뷰 저장
     @Transactional
     public Review saveReview(Review review) {
         return reviewRepository.save(review);
@@ -27,6 +29,16 @@ public class ReviewService {
     public List<Review> findByMovie(Movie movie) {
         // 영화에 연관된 모든 리뷰를 반환
         return reviewRepository.findByMovie(movie);
+    }
+
+    // 리뷰 ID로 리뷰 찾기
+    public Optional<Review> findById(Long id) {
+        return reviewRepository.findById(id);
+    }
+
+    // 리뷰 삭제
+    public void deleteReviewById(Long id) {
+        reviewRepository.deleteById(id);
     }
 
 }
