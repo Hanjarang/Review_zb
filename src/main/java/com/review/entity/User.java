@@ -38,4 +38,7 @@ public class User {
     @NotBlank(message = "Password is mandatory")
     private String password;  // 사용자 비밀번호
 
+    @Column(nullable = false)
+    private String role = "USER"; // 별도의 입력이 없을 경우 기본값 USER
+
 }

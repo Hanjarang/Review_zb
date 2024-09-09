@@ -24,9 +24,13 @@ public class UserController {
     @PostMapping("/register")
     public ResponseEntity<String> registerUser(@Valid @RequestBody User user) {
         if (userService.registerUser(user)) {
-            return ResponseEntity.ok("회원가입이 완료되었습니다. 좋은 리뷰 공간을 만들어주세요.");
+            if ("ADMIN".equals(user.getRole())) {
+                return ResponseEntity.ok("관리자 권한으로 회원가입이 완료되었습니다. 좋은 리뷰 공간을 위해 힘써주세요.");
+            } else {
+                return ResponseEntity.ok("회원가입이 완료되었습니다. 좋은 리뷰 공간을 만들어주세요.");
+            }
         } else {
-            return ResponseEntity.badRequest().body("Registration failed. Username might be taken or invalid.");
+            return ResponseEntity.badRequest().body("회원가입을 실패했습니다. 입력하신 정보를 다시 한 번 확인해주세요.");
         }
     }
 

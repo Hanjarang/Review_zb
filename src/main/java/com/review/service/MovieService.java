@@ -23,10 +23,10 @@ public class MovieService {
     }
 
 
-    // 영화 ID로 영화 찾기 (추가된 부분)
-    public Optional<Movie> findById(Long id) {
-        return movieRepository.findById(id);
-    }
+//    // 영화 ID로 영화 찾기 (추가된 부분)
+//    public Optional<Movie> findById(Long id) {
+//        return movieRepository.findById(id);
+//    }
 
     // 영화 저장
     public Movie saveMovie(Movie movie) {
