@@ -42,6 +42,11 @@ public class MovieController {
             return ResponseEntity.status(401).body("로그인이 필요합니다.");
         }
 
+        // 출연진 수 제한 (3명까지만 허용)
+        if (cast.length > 3) {
+            return ResponseEntity.badRequest().body("출연진은 최대 3명까지만 입력할 수 있습니다.");
+        }
+
         // 세션에서 User 객체를 가져옵니다.
         User user = (User) session.getAttribute("user");
 
@@ -94,6 +99,72 @@ public class MovieController {
         List<Review> reviews = reviewService.findByMovie(movie.get());
         return ResponseEntity.ok(reviews);
     }
+
+
+    // 리뷰 수정
+    @PutMapping("/reviews/{reviewId}")
+    public ResponseEntity<String> updateReview(@PathVariable Long reviewId,
+                                               @RequestParam String content,
+                                               HttpServletRequest request) {
+        HttpSession session = request.getSession(false);
+        if (session == null || session.getAttribute("user") == null) {
+            return ResponseEntity.status(401).body("로그인이 필요합니다.");
+        }
+
+        // 세션에서 User 객체를 가져옵니다.
+        User user = (User) session.getAttribute("user");
+
+        // 리뷰를 ID로 검색
+        Optional<Review> existingReview = reviewService.findById(reviewId);
+        if (existingReview.isEmpty()) {
+            return ResponseEntity.badRequest().body("해당 리뷰를 찾을 수 없습니다.");
+        }
+
+        Review review = existingReview.get();
+
+        // 리뷰 작성자와 현재 사용자의 username이 일치하는지 확인
+        if (!review.getCreatedBy().equals(user.getUsername())) {
+            return ResponseEntity.status(403).body("수정할 권한이 없습니다.");
+        }
+
+        // 리뷰 내용 수정 (영화 정보는 수정 불가)
+        review.setContent(content);
+        reviewService.saveReview(review);
+
+        return ResponseEntity.ok("리뷰가 수정되었습니다.");
+    }
+
+    // 리뷰 삭제
+    @DeleteMapping("/reviews/{reviewId}")
+    public ResponseEntity<String> deleteReview(@PathVariable Long reviewId,
+                                               HttpServletRequest request) {
+        HttpSession session = request.getSession(false);
+        if (session == null || session.getAttribute("user") == null) {
+            return ResponseEntity.status(401).body("로그인이 필요합니다.");
+        }
+
+        // 세션에서 User 객체를 가져옵니다.
+        User user = (User) session.getAttribute("user");
+
+        // 리뷰를 ID로 검색
+        Optional<Review> existingReview = reviewService.findById(reviewId);
+        if (existingReview.isEmpty()) {
+            return ResponseEntity.badRequest().body("해당 리뷰를 찾을 수 없습니다.");
+        }
+
+        Review review = existingReview.get();
+
+        // 리뷰 작성자와 현재 사용자의 username이 일치하는지 확인
+        if (!review.getCreatedBy().equals(user.getUsername())) {
+            return ResponseEntity.status(403).body("삭제할 권한이 없습니다.");
+        }
+
+        // 리뷰 삭제
+        reviewService.deleteReviewById(reviewId);
+
+        return ResponseEntity.ok("리뷰가 삭제되었습니다.");
+    }
+
 
 
 
