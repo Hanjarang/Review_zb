@@ -3,6 +3,7 @@ package com.review.controller;
 import com.review.entity.Movie;
 import com.review.entity.Review;
 import com.review.entity.User;  // User 클래스 import 추가
+import com.review.service.ForbiddenWordService;
 import com.review.service.MovieService;
 import com.review.service.ReviewService;
 import jakarta.servlet.http.HttpServletRequest;
@@ -21,12 +22,15 @@ public class MovieController {
 
     private final MovieService movieService;
     private final ReviewService reviewService;
+    private final ForbiddenWordService forbiddenWordService;  // ForbiddenWordService 추가
 
     @Autowired
-    public MovieController(MovieService movieService, ReviewService reviewService) {
+    public MovieController(MovieService movieService, ReviewService reviewService, ForbiddenWordService forbiddenWordService) {  // ForbiddenWordService 주입
         this.movieService = movieService;
         this.reviewService = reviewService;
+        this.forbiddenWordService = forbiddenWordService;  // 주입된 ForbiddenWordService 초기화
     }
+
 
     // 영화 정보 등록 및 리뷰 작성 (최초 등록 시)
     @PostMapping("/review")
@@ -50,6 +54,11 @@ public class MovieController {
 
         // 세션에서 User 객체를 가져옵니다.
         User user = (User) session.getAttribute("user");
+
+        // 리뷰 내용에 검열 단어가 포함되어 있는지 확인
+        if (forbiddenWordService.containsForbiddenWord(reviewContent)) {
+            return ResponseEntity.badRequest().body("부정적인 언어의 사용으로 리뷰 등록이 불가능합니다.");
+        }
 
         // 영화 정보 확인
         Optional<Movie> existingMovie = movieService.findByTitleAndReleaseYear(title, releaseYear);
