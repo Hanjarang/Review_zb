@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -60,7 +61,7 @@ public class MovieController {
             review.setCreatedBy(user.getUsername());  // User 객체에서 username을 사용
             reviewService.saveReview(review);
 
-            return ResponseEntity.ok("이미 등록된 영화정보가 존재합니다. 좋은 리뷰는 좋은 영화를 만듭니다.");
+            return ResponseEntity.ok("이미 등록된 영화정보가 존재하여 리뷰만 등록됩니다. 좋은 리뷰는 좋은 영화를 만듭니다.");
         } else {
             // 영화 정보가 존재하지 않는 경우 영화 정보 등록 및 리뷰 작성
             Movie movie = new Movie();
@@ -68,7 +69,7 @@ public class MovieController {
             movie.setReleaseYear(releaseYear);
             movie.setCategory(category);
             movie.setDirector(director);
-            movie.setCast(List.of(cast));  // 배열을 리스트로 변환
+            movie.setCast(new ArrayList<>(List.of(cast)));  // mutable 리스트로 설정
             movie.setPlot(plot);
             movie.setCreatedBy(user.getUsername());  // User 객체에서 username을 사용
 
@@ -82,7 +83,7 @@ public class MovieController {
 
             reviewService.saveReview(review);
 
-            return ResponseEntity.ok("영화 정보 및 리뷰가 등록되었습니다.좋은 리뷰는 좋은 영화를 만듭니다.");
+            return ResponseEntity.ok("영화 정보 및 리뷰가 등록되었습니다. 좋은 리뷰는 좋은 영화를 만듭니다.");
         }
     }
 
@@ -164,6 +165,50 @@ public class MovieController {
 
         return ResponseEntity.ok("리뷰가 삭제되었습니다.");
     }
+
+    // 관리자 권한 리뷰 수정
+    @PutMapping("/edit")
+    public ResponseEntity<String> editMovie(@RequestParam String title,
+                                            @RequestParam int releaseYear,
+                                            @RequestParam String category,
+                                            @RequestParam String director,
+                                            @RequestParam("cast[]") String[] cast,  // 출연진 배열
+                                            @RequestParam String plot,
+                                            HttpServletRequest request) {
+        HttpSession session = request.getSession(false);
+        if (session == null || session.getAttribute("user") == null) {
+            return ResponseEntity.status(401).body("로그인이 필요합니다.");
+        }
+
+        // 세션에서 User 객체를 가져옵니다.
+        User user = (User) session.getAttribute("user");
+
+        // 관리자 권한 확인
+        if (!"ADMIN".equals(user.getRole())) {  // "ADMIN" 권한 확인
+            return ResponseEntity.status(403).body("관리자 권한이 필요합니다.");
+        }
+
+        // 영화 제목과 출시년도로 영화 찾기
+        Optional<Movie> movie = movieService.findByTitleAndReleaseYear(title, releaseYear);
+        if (movie.isEmpty()) {
+            return ResponseEntity.badRequest().body("해당 영화 정보를 찾을 수 없습니다.");
+        }
+
+        Movie existingMovie = movie.get();
+
+        // 영화 정보 수정
+        existingMovie.setTitle(title);
+        existingMovie.setReleaseYear(releaseYear);
+        existingMovie.setCategory(category);
+        existingMovie.setDirector(director);
+        existingMovie.setCast(new ArrayList<>(List.of(cast)));
+        existingMovie.setPlot(plot);
+
+        movieService.saveMovie(existingMovie);
+
+        return ResponseEntity.ok("관리자의 권한으로 영화 정보가 수정되었습니다.");
+    }
+
 
 
 

@@ -6,6 +6,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Getter
@@ -34,7 +35,7 @@ public class Movie {
     @ElementCollection
     @CollectionTable(name = "movie_cast", joinColumns = @JoinColumn(name = "movie_id"))
     @Column(name = "cast_member")
-    private List<String> cast;  // 출연진 (최대 3명)
+    private List<String> cast = new ArrayList<>();  // 출연진 (최대 3명), ArrayList로 초기화
 
     @Column(nullable = false, length = 1000)
     private String plot;  // 줄거리
@@ -42,6 +43,4 @@ public class Movie {
     @Column(nullable = false)
     private String createdBy;  // 최초 등록자
 
-    // Getters and Setters
-    // 기본 생성자, 필드 기반 생성자 등
 }
