@@ -9,6 +9,7 @@ import com.review.service.ReviewService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -216,6 +217,17 @@ public class MovieController {
         movieService.saveMovie(existingMovie);
 
         return ResponseEntity.ok("관리자의 권한으로 영화 정보가 수정되었습니다.");
+    }
+
+    // 영화 목록 조회 (카테고리와 제목 종류로 구분)
+    @GetMapping("/list")
+    public ResponseEntity<Page<Movie>> getMovies(
+            @RequestParam String category,  // "장편" 또는 "단편"
+            @RequestParam boolean isKorean, // true면 한글 제목, false면 영어 제목
+            @RequestParam int page) {       // 페이지 번호
+
+        Page<Movie> movies = movieService.getMoviesByCategoryAndTitle(category, isKorean, page);
+        return ResponseEntity.ok(movies);
     }
 
 
