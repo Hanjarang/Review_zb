@@ -1,23 +1,29 @@
 package com.review.service;
 
 import com.review.entity.Movie;
+import com.review.entity.Review;
 import com.review.repository.MovieRepository;
+import com.review.repository.ReviewRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Optional;
 
 @Service
 public class MovieService {
 
     private final MovieRepository movieRepository;
+    private final ReviewRepository reviewRepository;
 
     @Autowired
-    public MovieService(MovieRepository movieRepository) {
+    public MovieService(MovieRepository movieRepository, ReviewRepository reviewRepository) {
         this.movieRepository = movieRepository;
+        this.reviewRepository = reviewRepository;
     }
 
     // 제목과 출시년도로 영화 찾기
@@ -43,13 +49,14 @@ public class MovieService {
 
         PageRequest pageRequest = PageRequest.of(page, pageSize, sort);
 
-        // 한글/영어 구분에 따라 검색
-        if (isKorean) {
-            // 한글 제목의 영화 검색 (제목의 첫 글자가 한글인지 확인)
-            return movieRepository.findByCategoryAndTitleMatchingFirstLetter(category, true, pageRequest);
-        } else {
-            // 영어 제목의 영화 검색 (제목의 첫 글자가 영어인지 확인)
-            return movieRepository.findByCategoryAndTitleMatchingFirstLetter(category, false, pageRequest);
-        }
+        // isKorean 값을 그대로 repository로 전달
+        return movieRepository.findByCategoryAndTitleMatchingFirstLetter(category, isKorean, pageRequest);
     }
+
+
+    // 영화 제목으로 리뷰 목록을 페이지 단위로 제공
+    public List<Movie> findByTitle(String title) {
+        return movieRepository.findByTitle(title);
+    }
+
 }
