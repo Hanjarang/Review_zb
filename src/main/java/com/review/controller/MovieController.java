@@ -10,6 +10,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -98,18 +99,42 @@ public class MovieController {
     }
 
 
-    // 영화 리뷰 목록 조회
+    // 영화 제목과 출시 연도로 리뷰 목록 조회
+// 영화 제목과 출시 연도로 리뷰 목록 조회
     @GetMapping("/reviews")
-    public ResponseEntity<List<Review>> getReviewsForMovie(@RequestParam String title, @RequestParam int releaseYear) {
-        Optional<Movie> movie = movieService.findByTitleAndReleaseYear(title, releaseYear);
-        if (movie.isEmpty()) {
-            return ResponseEntity.badRequest().body(null);
+    public ResponseEntity<?> getReviewsForMovie(
+            @RequestParam String title,
+            @RequestParam(required = false) Integer releaseYear, // 년도는 선택 입력
+            @RequestParam(defaultValue = "0") int page) { // 페이지 번호 기본값 설정
+
+        // 제목과 출시 연도를 모두 입력했을 경우
+        if (releaseYear != null) {
+            Optional<Movie> movie = movieService.findByTitleAndReleaseYear(title, releaseYear);
+            if (movie.isEmpty()) {
+                return ResponseEntity.badRequest().body("해당 년도에 출시된 영화가 없습니다.");
+            }
+
+            // 영화와 연관된 리뷰를 20개씩 페이지 단위로 반환
+            Page<Review> reviews = reviewService.findByMovie(movie.get(), PageRequest.of(page, 20));
+            return ResponseEntity.ok(reviews);
         }
 
-        // 영화와 연관된 모든 리뷰 가져오기
-        List<Review> reviews = reviewService.findByMovie(movie.get());
+        // 제목만 입력했을 경우
+        List<Movie> movies = movieService.findByTitle(title);
+
+        if (movies.isEmpty()) {
+            return ResponseEntity.badRequest().body("해당 제목의 영화로 등록된 리뷰가 없습니다.");
+        } else if (movies.size() > 1) {
+            // 동일 제목의 영화가 여러 개일 경우
+            return ResponseEntity.badRequest().body("동일 제목의 영화가 있습니다. 검색을 희망하는 영화의 년도를 입력하세요.");
+        }
+
+        // 동일 제목의 영화가 하나일 경우
+        Movie movie = movies.get(0);
+        Page<Review> reviews = reviewService.findByMovie(movie, PageRequest.of(page, 20));
         return ResponseEntity.ok(reviews);
     }
+
 
 
     // 리뷰 수정
@@ -229,7 +254,6 @@ public class MovieController {
         Page<Movie> movies = movieService.getMoviesByCategoryAndTitle(category, isKorean, page);
         return ResponseEntity.ok(movies);
     }
-
 
 
 

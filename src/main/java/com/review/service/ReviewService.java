@@ -4,6 +4,8 @@ import com.review.entity.Movie;
 import com.review.entity.Review;
 import com.review.repository.ReviewRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -39,6 +41,11 @@ public class ReviewService {
     // 리뷰 삭제
     public void deleteReviewById(Long id) {
         reviewRepository.deleteById(id);
+    }
+
+    // 영화에 대한 리뷰를 페이징하여 반환하는 메서드 추가
+    public Page<Review> findByMovie(Movie movie, Pageable pageable) {
+        return reviewRepository.findByMovie(movie, pageable);
     }
 
 }
