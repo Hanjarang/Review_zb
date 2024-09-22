@@ -1,5 +1,6 @@
 package com.review.service;
 
+import com.review.dto.ReviewDTO;
 import com.review.entity.Movie;
 import com.review.entity.Review;
 import com.review.repository.ReviewRepository;
@@ -44,8 +45,21 @@ public class ReviewService {
     }
 
     // 영화에 대한 리뷰를 페이징하여 반환하는 메서드 추가
-    public Page<Review> findByMovie(Movie movie, Pageable pageable) {
-        return reviewRepository.findByMovie(movie, pageable);
+//    public Page<Review> findByMovie(Movie movie, Pageable pageable) {
+//        return reviewRepository.findByMovie(movie, pageable);
+//    }
+
+    public Page<ReviewDTO> findByMovie(Movie movie, Pageable pageable) {
+        Page<Review> reviews = reviewRepository.findByMovie(movie, pageable);
+        return reviews.map(this::convertToReviewDTO); // Convert to DTO
+    }
+
+    private ReviewDTO convertToReviewDTO(Review review) {
+        ReviewDTO dto = new ReviewDTO();
+        dto.setId(review.getId());
+        dto.setContent(review.getContent());
+        dto.setCreatedBy(review.getCreatedBy());
+        return dto;
     }
 
 }
