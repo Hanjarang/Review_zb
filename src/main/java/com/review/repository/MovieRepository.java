@@ -18,6 +18,10 @@ public interface MovieRepository extends JpaRepository<Movie, Long> {
             " (:isKorean = false AND SUBSTRING(m.title, 1, 1) BETWEEN 'A' AND 'Z'))")
     Page<Movie> findByCategoryAndTitleMatchingFirstLetter(String category, boolean isKorean, Pageable pageable);
 
+    // 영화 제목으로 영화 검색
     List<Movie> findByTitle(String title);
+
+    // 출연진 이름으로 영화 검색
+    Page<Movie> findByCastContaining(String castMember, Pageable pageable);
 
 }
