@@ -34,7 +34,7 @@ public class Movie {
 
     @ElementCollection
     @CollectionTable(name = "movie_cast", joinColumns = @JoinColumn(name = "movie_id"))
-    @Column(name = "cast_member")
+    @Column(name = "cast_name")
     private List<String> cast = new ArrayList<>();  // 출연진 (최대 3명), ArrayList로 초기화
 
     @Column(nullable = false, length = 1000)
